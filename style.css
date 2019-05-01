@@ -1,0 +1,43 @@
+
+.letter{
+  background-color: yellow;
+  position:absolute;
+  width:20px;
+  height:20px;
+  text-align: center;
+  cursor: pointer;  
+}
+
+.border-red{
+ border: 1px solid red;
+}
+
+.dropBox{
+    border: 1px solid red;
+    background:#9b8a8a;
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    margin: 5px;
+}
+
+#row1{
+    text-align: center;
+}
+
+#row2{
+    text-align: center;
+}
+
+.letterBox{
+    border: 1px solid red;
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    margin: 5px;
+}
+
+.score{
+  text-align: center;
+}
+

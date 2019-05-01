@@ -1,0 +1,230 @@
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.4.0.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css?v=3">
+</head>
+
+<body>
+    <div class="container" style="margin-top: 40px;">
+        <div class="row">
+            <div class="col-sm-6" style="background-color:lavender;">SCORE</div>
+            <div class="col-sm-6" style="background-color:lavenderblush;" id="score">0</div>
+        </div>
+        <div id="mainSec" class="row">
+        </div>
+        </br>
+        <div class="row">
+            <div class="col-sm-12" style="text-align: center;">
+                <button id="submitBtn" class="btn-primary">Submit</button>
+                <button id="reloadBtn" class="btn-primary">Reload</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+
+        $(document).ready(function () {
+
+            const maxWordCount = 8;
+            const usedWords = [];
+            let words = [];
+            let answer = '';
+            let finalAnswer = '';
+            let score = 0;
+            /*
+             Retrive words from dictionary.txt and convert to an array
+            */
+            $.ajax({
+                url: "./dictionary.txt",
+                async: false,
+                success: function (data) {
+                    words = data.split('\n');
+                    initLoad();
+                }
+            });
+
+            /*
+              calculate score
+            */
+            function getScore(word) {
+                return (word.length / maxWordCount) * 100;
+            }
+
+
+            /*
+             get unused words
+            */
+            function getUnusedWords() {
+                if (usedWords.length > 0) {
+                    let unUsedWords;
+                    usedWords.forEach(usedWord => {
+                        unUsedWords = words.filter(word => {
+                            return word !== usedWord;
+                        });
+                    });
+                    return unUsedWords;
+                } else {
+                    return words;
+                }
+            }
+
+            /*
+             get random characters
+            */
+            function generateCharset(charSize) {
+                const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                let retVal = "";
+                for (let i = 0, n = charset.length; i < charSize; ++i) {
+                    retVal += charset.charAt(Math.floor(Math.random() * n));
+                }
+                return retVal;
+            }
+
+            /*
+             frame content
+            */
+            function initLoad(reload = false) {
+                const unUsedWords = getUnusedWords();
+
+                //Reset variable to handle reload
+                finalAnswer = '';
+                answer = '';
+
+
+                function getMaxCharWord() {
+                    const randomIndex = Math.floor(Math.random() * unUsedWords.length);
+                    let randomWord = unUsedWords[randomIndex].trim();
+                    console.log("generated word::", randomWord, '::', randomWord.length);
+                    if (randomWord.length > maxWordCount) {
+                        getMaxCharWord();
+                    }
+
+                    if (finalAnswer === '') {
+                        finalAnswer = randomWord;
+                        console.log("correct answer::", finalAnswer);
+                    }
+                    return finalAnswer;
+                }
+                let randomWord = getMaxCharWord();
+
+                // Adding padding with some character if word count less than 8
+                if (randomWord.length < maxWordCount) {
+                    randomWord += generateCharset(maxWordCount - randomWord.length);
+                }
+
+                console.log("with extra", randomWord);
+
+                // Shuffling the word
+                let shuffled = randomWord.split('').sort(() => {
+                    return 0.5 - Math.random()
+                }).join('');
+
+                console.log(shuffled);
+
+                const getWordRow = (dispCharset) => {
+                    let row = '<div id="row2">';
+                    for (var i = 0; i < maxWordCount; i++) {
+                        row += `<div  class="letterBox">
+          <div class="letter">       
+           ${dispCharset[i]}
+          </div>
+       </div>`;
+                    }
+                    row += '</div>'
+                    return row;
+                }
+                const getAnswerRow = () => {
+                    let row = '<div id="row2">';
+                    for (var i = 0; i < maxWordCount; i++) {
+                        const dropBoxId = 'b' + (i + 1);
+                        row += `<div  class="dropBox" id="${dropBoxId}">&nbsp;</div>`;
+                    }
+                    row += '</div>'
+                    return row;
+                }
+                const playBoxRow1 = getAnswerRow();
+                const playBoxRow2 = getWordRow(shuffled);
+
+                if (reload) {
+                    $('#mainSec').empty();
+                    $('#mainSec').append(playBoxRow1, playBoxRow2);
+                } else {
+                    $('#mainSec').append(playBoxRow1, playBoxRow2);
+                }
+
+                let x;
+                let y;
+                let selectedIndex = 1;
+                $('.letter').each(function (index) {
+                    var xi = $(this).offset().left;
+                    var yi = $(this).offset().top;
+                    $(this).css('left', xi).css('top', yi);
+                    $(this).click((e) => {
+                        if (selectedIndex <= maxWordCount) {
+                            const $link = $(e.target);
+                            e.preventDefault();
+
+                            // prevent multiple click at same time
+                            if (!$link.data('lockedAt') || +new Date() - $link.data('lockedAt') > 300) {
+                                const el = '#b' + selectedIndex;
+                                x = $(el).offset().left;
+                                y = $(el).offset().top;
+                                selectedIndex++;
+                                answer += $(this).text().trim();
+                                $(this).animate({
+                                    left: x,
+                                    top: y
+                                }, 'slow')
+                            }
+                            $link.data('lockedAt', +new Date());
+                        }
+                    })
+                });
+            }
+
+            $('#submitBtn').click((e) => {
+
+                // Match with picked word
+                if (finalAnswer === answer) {
+                    callSuccess();
+                } else {
+
+                    // Match with any word which is available in the dictionary
+                    let isFound = false;
+                    words.some(w => {
+                        if (w.trim() === answer.trim()) {
+                            isFound = true;
+                            return true;
+                        }
+                    })
+
+                    if (isFound === true) {
+                        callSuccess();
+                    } else {
+                        alert("Wrong Answer");
+                    }
+                }
+            })
+
+            function callSuccess() {
+                usedWords.push(answer);
+                score = getScore(answer);
+                score += parseInt($('#score').text());
+                $('#score').text(score);
+                alert("Congrats!!!, you can continue...");
+                initLoad(true);
+
+            }
+
+            $('#reloadBtn').click((e) => {
+                location.reload();
+            })
+
+        });
+    </script>
+</body>
+
+</html>
