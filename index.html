@@ -84,7 +84,7 @@
             }
 
             /*
-             frame content
+             main content
             */
             function initLoad(reload = false) {
                 const unUsedWords = getUnusedWords();
@@ -128,10 +128,10 @@
                     let row = '<div id="row2">';
                     for (var i = 0; i < maxWordCount; i++) {
                         row += `<div  class="letterBox">
-          <div class="letter">       
-           ${dispCharset[i]}
-          </div>
-       </div>`;
+                                    <div class="letter">       
+                                      ${dispCharset[i]}
+                                     </div>
+                                </div>`;
                     }
                     row += '</div>'
                     return row;
@@ -149,6 +149,7 @@
                 const playBoxRow2 = getWordRow(shuffled);
 
                 if (reload) {
+                    // Remove old element while reload
                     $('#mainSec').empty();
                     $('#mainSec').append(playBoxRow1, playBoxRow2);
                 } else {
@@ -208,7 +209,8 @@
                     }
                 }
             })
-
+   
+            // Show success message and allow to continue 
             function callSuccess() {
                 usedWords.push(answer);
                 score = getScore(answer);
