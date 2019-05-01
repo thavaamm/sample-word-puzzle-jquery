@@ -1,10 +1,11 @@
 
 .letter{
-  background-color: yellow;
+  background-color: #2bbc56;
   position:absolute;
-  width:20px;
-  height:20px;
+  width:35px;
+  height:35px;
   text-align: center;
+  font-size: 20px;
   cursor: pointer;  
 }
 
@@ -15,8 +16,8 @@
 .dropBox{
     border: 1px solid red;
     background:#9b8a8a;
-    width: 20px;
-    height: 20px;
+    width: 35px;
+    height: 35px;
     display: inline-block;
     margin: 5px;
 }
@@ -31,8 +32,8 @@
 
 .letterBox{
     border: 1px solid red;
-    width: 20px;
-    height: 20px;
+    width: 35px;
+    height: 35px;
     display: inline-block;
     margin: 5px;
 }
